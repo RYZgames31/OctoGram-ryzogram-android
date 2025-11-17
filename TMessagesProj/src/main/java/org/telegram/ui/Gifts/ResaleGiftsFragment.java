@@ -66,6 +66,7 @@ import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stars.StarGiftSheet;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
@@ -162,7 +163,7 @@ public class ResaleGiftsFragment extends BaseFragment {
         fragmentView.setBackgroundColor(backgroundColor);
         this.fragmentView = fragmentView;
 
-        StarsIntroActivity.StarsBalanceView balanceView = new StarsIntroActivity.StarsBalanceView(context, currentAccount);
+        StarsIntroActivity.StarsBalanceView balanceView = new StarsIntroActivity.StarsBalanceView(context, currentAccount, resourceProvider);
         ScaleStateListAnimator.apply(balanceView);
         balanceView.setOnClickListener(v -> {
             if (balanceView.lastBalance <= 0) return;
@@ -814,16 +815,32 @@ public class ResaleGiftsFragment extends BaseFragment {
                             }
                         }
                     };
-                    presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
-                        if (closeParentSheet != null) {
-                            closeParentSheet.run();
+                    /*if (parentLayout != null && parentLayout.isSheet()) {
+                        finishFragment();
+                        BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
+                        if (lastFragment != null) {
+                            lastFragment.presentFragment(chatActivity);
                         }
-                    }));
-//                    presentFragment(chatActivity, true);
-//
-//                    if (closeParentSheet != null) {
-//                        closeParentSheet.run();
-//                    }
+                    } else {
+                        presentFragment(chatActivity, true);
+                    }
+
+                    if (closeParentSheet != null) {
+                        closeParentSheet.run();
+                    }*/
+                    if (parentLayout != null && parentLayout.isSheet()) {
+                        finishFragment();
+                        BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
+                        if (lastFragment != null) {
+                            lastFragment.presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                                if (closeParentSheet != null) closeParentSheet.run();
+                            }));
+                        }
+                    } else {
+                        presentFragment(new INavigationLayout.NavigationParams(chatActivity).setRemoveLast(true).setOnFragmentOpen(() -> {
+                            if (closeParentSheet != null) closeParentSheet.run();
+                        }));
+                    }
                 }
             });
             showDialog(sheet);

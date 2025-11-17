@@ -158,7 +158,7 @@ public class DragAndDropImageHandler {
             boolean sending;
 
             @Override
-            public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, boolean forceDocument) {
+            public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, int scheduleRepeatPeriod, boolean forceDocument) {
                 if (chatActivityEnterView.replyingQuote != null && chatActivityEnterView.replyingQuote.outdated) {
                     parentFragment.showQuoteMessageUpdate();
                     return;
@@ -197,6 +197,7 @@ public class DragAndDropImageHandler {
                         chatActivityEnterView.getEditingMessageObject(),
                         notify,
                         scheduleDate,
+                        0,
                         parentFragment.getChatMode(),
                         updateStickersOrder,
                         null,
@@ -208,7 +209,7 @@ public class DragAndDropImageHandler {
                         0,
                         null
                 );
-                if (delegate != null) delegate.onMessageSend(null, true, scheduleDate, 0);
+                if (delegate != null) delegate.onMessageSend(null, true, scheduleDate, 0, 0);
             }
 
             @Override

@@ -193,6 +193,7 @@
     <string name="AiFeatures_CustomModels_Full">Custom AI Models</string>
     <string name="AiFeatures_CustomModels_Feature_UseMessages">USE LAST %d MESSAGES</string>
     <string name="AiFeatures_CustomModels_Feature_UseMessages_Defined">USE %1$s</string>
+    <string name="AiFeatures_CustomModels_Feature_SelectedMessages">%1$s · %2$s</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel">Select model</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc">Describe your question here</string>
     <string name="AiFeatures_CustomModels_Feature_SelectModel_Desc_Brief">Question</string>
@@ -428,6 +429,11 @@
     <string name="CustomEmojiReaction">Custom emoji reaction</string>
     <string name="TryConnectWithIPV6">Try connecting through IPv6</string>
     <string name="InputBoxSettings">Input Box</string>
+    <string name="OctoInputBoxStyle">Input box style</string>
+    <string name="OctoInputBoxStyle_Desc">Change the background treatment on the compose area.</string>
+    <string name="OctoInputBoxStyleLiquidGlass">Liquid glass</string>
+    <string name="OctoInputBoxStyleStockSolid">Stock solid</string>
+    <string name="OctoInputBoxStyleMaterial3">Material You (MD3)</string>
     <string name="DefaultEmojiButtonType2">Left button action</string>
     <string name="DefaultRightButtonType">Right button action</string>
     <string name="DefaultEmojiButtonTypeDefault">Default</string>

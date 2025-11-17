@@ -24,6 +24,7 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.LaunchActivity;
 
@@ -185,6 +186,7 @@ public class OctoConfig {
     public final ConfigProperty<Boolean> promptBeforeSendingVideoMessages = newConfigProperty("promptBeforeSendingVideoMessages", false);
     public final ConfigProperty<Boolean> useBlurredContextMenu = newConfigProperty("useBlurredContextMenu", false);
     public final ConfigProperty<Boolean> md3ChatActions = newConfigProperty("md3ChatActions", false);
+    public final ConfigProperty<Integer> inputBoxStyle = newConfigProperty("inputBoxStyle", 0);
 
     /*Folders*/
     public final ConfigProperty<Integer> tabMode = newConfigProperty("tabMode", TabMode.MIXED.getValue());

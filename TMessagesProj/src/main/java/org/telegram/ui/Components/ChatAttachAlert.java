@@ -479,7 +479,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
                     @Override
                     public boolean isClipboardAvailable() {
-                        return MediaDataController.getInstance(currentAccount).botInAttachMenu(id);
+                        return MediaDataController.getInstance(currentAccount).botInAttachMenu(id) || MessagesController.getInstance(currentAccount).whitelistedBots.contains(id);
                     }
                 });
                 MessageObject replyingObject = ((ChatActivity) baseFragment).getChatActivityEnterView().getReplyingMessageObject();
@@ -558,7 +558,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             return false;
         }
 
-        void didPressedButton(int button, boolean arg, boolean notify, int scheduleDate, long effectId, boolean invertMedia, boolean forceDocument, long payStars);
+        void didPressedButton(int button, boolean arg, boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia, boolean forceDocument, long payStars);
 
         default void onCameraOpened() {
         }
@@ -587,7 +587,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         }
 
-        default void sendAudio(ArrayList<MessageObject> audios, CharSequence caption, boolean notify, int scheduleDate, long effectId, boolean invertMedia, long payStars) {
+        default void sendAudio(ArrayList<MessageObject> audios, CharSequence caption, boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia, long payStars) {
 
         }
     }
@@ -813,7 +813,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             return 0;
         }
 
-        public boolean sendSelectedItems(boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+        public boolean sendSelectedItems(boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia) {
             return false;
         }
 
@@ -2190,7 +2190,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     }
 
                     @Override
-                    public void actionButtonPressed(boolean canceled, boolean notify, int scheduleDate) {
+                    public void actionButtonPressed(boolean canceled, boolean notify, int scheduleDate, int scheduleRepeatPeriod) {
                         if (canceled) {
                             return;
                         }
@@ -2280,7 +2280,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     return false;
                 }
                 @Override
-                public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, boolean forceDocument) {
+                public void sendButtonPressed(int index, VideoEditedInfo videoEditedInfo, boolean notify, int scheduleDate, int scheduleRepeatPeriod, boolean forceDocument) {
                     sent = true;
                     if (delegate == null) {
                         return;
@@ -2291,7 +2291,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                         ChatAttachAlertPhotoLayout.selectedPhotos.clear();
                         ChatAttachAlertPhotoLayout.selectedPhotosOrder.add(0);
                         ChatAttachAlertPhotoLayout.selectedPhotos.put(0, entry);
-                        delegate.didPressedButton(7, true, notify, scheduleDate, 0, isCaptionAbove(), forceDocument, payStars);
+                        delegate.didPressedButton(7, true, notify, scheduleDate, 0, 0, isCaptionAbove(), forceDocument, payStars);
                     });
                 }
             }, baseFragment instanceof ChatActivity ? (ChatActivity) baseFragment : null);
@@ -2591,7 +2591,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                         showLayout(todoLayout);
                     }
                 } else if (view.getTag() instanceof Integer) {
-                    delegate.didPressedButton((Integer) view.getTag(), true, true, 0, 0, isCaptionAbove(), false, 0);
+                    delegate.didPressedButton((Integer) view.getTag(), true, true, 0, 0, 0, isCaptionAbove(), false, 0);
                 }
 
                 int left = view.getLeft();
@@ -2860,7 +2860,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             @Override
             protected void extendActionMode(ActionMode actionMode, Menu menu) {
                 if (baseFragment instanceof ChatActivity) {
-                    ChatActivity.fillActionModeMenu(menu, ((ChatActivity) baseFragment).getCurrentEncryptedChat(), true);
+                    ChatActivity.fillActionModeMenu(menu, ((ChatActivity) baseFragment).getCurrentEncryptedChat(), true, true);
                 }
                 super.extendActionMode(actionMode, menu);
             }
@@ -2989,7 +2989,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             @Override
             protected void extendActionMode(ActionMode actionMode, Menu menu) {
                 if (baseFragment instanceof ChatActivity) {
-                    ChatActivity.fillActionModeMenu(menu, ((ChatActivity) baseFragment).getCurrentEncryptedChat(), true);
+                    ChatActivity.fillActionModeMenu(menu, ((ChatActivity) baseFragment).getCurrentEncryptedChat(), true, true);
                 }
                 super.extendActionMode(actionMode, menu);
             }
@@ -3195,11 +3195,11 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 return;
             }
             if (editingMessageObject == null && baseFragment instanceof ChatActivity && ((ChatActivity) baseFragment).isInScheduleMode()) {
-                AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) baseFragment).getDialogId(), (notify, scheduleDate) -> {
+                AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) baseFragment).getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                     if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                        sendPressed(notify, scheduleDate, effectId, isCaptionAbove());
+                        sendPressed(notify, scheduleDate, 0, effectId, isCaptionAbove());
                     } else {
-                        if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, 0, isCaptionAbove())) {
+                        if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, scheduleRepeatPeriod, 0, isCaptionAbove())) {
                             allowPassConfirmationAlert = true;
                             dismiss();
                         }
@@ -3207,9 +3207,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }, resourcesProvider);
             } else {
                 if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                    sendPressed(true, 0, effectId, isCaptionAbove());
+                    sendPressed(true, 0, 0, effectId, isCaptionAbove());
                 } else {
-                    if (!currentAttachLayout.sendSelectedItems(true, 0, effectId, isCaptionAbove())) {
+                    if (!currentAttachLayout.sendSelectedItems(true, 0, 0, effectId, isCaptionAbove())) {
                         allowPassConfirmationAlert = true;
                         dismiss();
                     }
@@ -3269,12 +3269,12 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     return;
                 }
                 if (editingMessageObject == null && baseFragment instanceof ChatActivity && ((ChatActivity) baseFragment).isInScheduleMode()) {
-                    AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) baseFragment).getDialogId(), (notify, scheduleDate) -> {
+                    AlertsCreator.createScheduleDatePickerDialog(getContext(), ((ChatActivity) baseFragment).getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                         boolean shownDialog = false;
                         if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                            shownDialog = sendPressed(notify, scheduleDate, effectId, isCaptionAbove());
+                            shownDialog = sendPressed(notify, scheduleDate, scheduleRepeatPeriod, effectId, isCaptionAbove());
                         } else {
-                            if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, effectId, isCaptionAbove())) {
+                            if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, scheduleRepeatPeriod, effectId, isCaptionAbove())) {
                                 allowPassConfirmationAlert = true;
                                 dismiss();
                             }
@@ -3287,9 +3287,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 } else {
                     boolean shownDialog = false;
                     if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                        shownDialog = sendPressed(true, 0, effectId, isCaptionAbove());
+                        shownDialog = sendPressed(true, 0, 0, effectId, isCaptionAbove());
                     } else {
-                        if (!currentAttachLayout.sendSelectedItems(true, 0, effectId, isCaptionAbove())) {
+                        if (!currentAttachLayout.sendSelectedItems(true, 0, 0, effectId, isCaptionAbove())) {
                             allowPassConfirmationAlert = true;
                             dismiss();
                         }
@@ -3557,14 +3557,14 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             if (editingMessageObject == null && (chatActivity == null || !ChatObject.isMonoForum(chatActivity.getCurrentChat())) && ((chatActivity != null && chatActivity.canScheduleMessage()) || currentAttachLayout.canScheduleMessages())) {
                 final long finalDialogId = dialogId;
                 options.add(R.drawable.msg_calendar2, getString(self ? R.string.SetReminder : R.string.ScheduleMessage), () -> {
-                    AlertsCreator.createScheduleDatePickerDialog(getContext(), finalDialogId, (notify, scheduleDate) -> {
+                    AlertsCreator.createScheduleDatePickerDialog(getContext(), finalDialogId, (notify, scheduleDate, scheduleRepeatPeriod) -> {
                         final long effectId = messageSendPreview != null ? messageSendPreview.getSelectedEffect() : 0;
                         writeButton.setEffect(ChatAttachAlert.this.effectId = effectId);
                         boolean shownDialog = false;
                         if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                            shownDialog = sendPressed(notify, scheduleDate, effectId, isCaptionAbove());
+                            shownDialog = sendPressed(notify, scheduleDate, scheduleRepeatPeriod, effectId, isCaptionAbove());
                         } else {
-                            if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, effectId, isCaptionAbove())) {
+                            if (!currentAttachLayout.sendSelectedItems(notify, scheduleDate, scheduleRepeatPeriod, effectId, isCaptionAbove())) {
                                 dismiss();
                             }
                         }
@@ -3584,7 +3584,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                             finalChatActivity, resourcesProvider, MessageSuggestionOfferSheet.MODE_INPUT, (params) -> {
 
                         finalChatActivity.messageSuggestionParams = params;
-                        final boolean shownDialog = sendPressed(true, 0, effectId, isCaptionAbove());
+                        final boolean shownDialog = sendPressed(true, 0, 0, effectId, isCaptionAbove());
                         if (messageSendPreview != null) {
                             messageSendPreview.dismiss(!shownDialog);
                             messageSendPreview = null;
@@ -3598,9 +3598,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     writeButton.setEffect(ChatAttachAlert.this.effectId = effectId);
                     boolean shownDialog = false;
                     if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                        shownDialog = sendPressed(false, 0, effectId, isCaptionAbove());
+                        shownDialog = sendPressed(false, 0, 0, effectId, isCaptionAbove());
                     } else {
-                        if (!currentAttachLayout.sendSelectedItems(false, 0, effectId, isCaptionAbove())) {
+                        if (!currentAttachLayout.sendSelectedItems(false, 0, 0, effectId, isCaptionAbove())) {
                             dismiss();
                         }
                     }
@@ -3906,8 +3906,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         if (Build.VERSION.SDK_INT >= 30) {
             navBarColorKey = -1;
             navBarColor = ColorUtils.setAlphaComponent(getThemedColor(Theme.key_windowBackgroundGray), 0);
-            AndroidUtilities.setNavigationBarColor(getWindow(), navBarColor, false);
-            AndroidUtilities.setLightNavigationBar(getWindow(), AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
+            AndroidUtilities.setNavigationBarColor(this, navBarColor, false);
+            AndroidUtilities.setLightNavigationBar(this, AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
         }
     }
 
@@ -3957,7 +3957,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         currentAttachLayout.applyCaption(getCommentView().getText());
     }
 
-    private boolean sendPressed(boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+    private boolean sendPressed(boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia) {
         if (buttonPressed) {
             return false;
         }
@@ -3975,7 +3975,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         applyCaption();
         return AlertsCreator.ensurePaidMessageConfirmation(currentAccount, getDialogId(), (currentAttachLayout == null ? 1 : currentAttachLayout.getSelectedItemsCount()) + getAdditionalMessagesCount(), payStars -> {
             setButtonPressed(true);
-            delegate.didPressedButton(7, true, notify, scheduleDate, effectId, invertMedia, false, payStars);
+            delegate.didPressedButton(7, true, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, false, payStars);
         });
     }
 
@@ -4319,11 +4319,11 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         }
         if (audioLayout == null) {
             layouts[3] = audioLayout = new ChatAttachAlertAudioLayout(this, getContext(), resourcesProvider);
-            audioLayout.setDelegate((audios, caption, notify, scheduleDate, effectId, invertMedia, payStars) -> {
+            audioLayout.setDelegate((audios, caption, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, payStars) -> {
                 if (baseFragment != null && baseFragment instanceof ChatActivity) {
-                    ((ChatActivity) baseFragment).sendAudio(audios, caption, notify, scheduleDate, effectId, invertMedia, payStars);
+                    ((ChatActivity) baseFragment).sendAudio(audios, caption, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, payStars);
                 } else if (delegate != null) {
-                    delegate.sendAudio(audios, caption, notify, scheduleDate, effectId, invertMedia, payStars);
+                    delegate.sendAudio(audios, caption, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, payStars);
                 }
             });
         }
@@ -4364,22 +4364,22 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             layouts[4] = documentLayout = new ChatAttachAlertDocumentLayout(this, getContext(), type, resourcesProvider);
             documentLayout.setDelegate(new ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate() {
                 @Override
-                public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<TLRPC.MessageEntity> captionEntities, ArrayList<MessageObject> fmessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia, long payStars) {
+                public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<TLRPC.MessageEntity> captionEntities, ArrayList<MessageObject> fmessages, boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia, long payStars) {
                     if (documentsDelegate != null) {
-                        documentsDelegate.didSelectFiles(files, caption, captionEntities, fmessages, notify, scheduleDate, effectId, invertMedia, payStars);
+                        documentsDelegate.didSelectFiles(files, caption, captionEntities, fmessages, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, payStars);
                     } else if (baseFragment instanceof ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate) {
-                        ((ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate) baseFragment).didSelectFiles(files, caption, captionEntities, fmessages, notify, scheduleDate, effectId, invertMedia, payStars);
+                        ((ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate) baseFragment).didSelectFiles(files, caption, captionEntities, fmessages, notify, scheduleDate, scheduleRepeatPeriod, effectId, invertMedia, payStars);
                     } else if (baseFragment instanceof PassportActivity) {
                         ((PassportActivity) baseFragment).didSelectFiles(files, caption, notify, scheduleDate, effectId, invertMedia);
                     }
                 }
 
                 @Override
-                public void didSelectPhotos(ArrayList<SendMessagesHelper.SendingMediaInfo> photos, boolean notify, int scheduleDate, long payStars) {
+                public void didSelectPhotos(ArrayList<SendMessagesHelper.SendingMediaInfo> photos, boolean notify, int scheduleDate, int scheduleRepeatPeriod, long payStars) {
                     if (documentsDelegate != null) {
-                        documentsDelegate.didSelectPhotos(photos, notify, scheduleDate, payStars);
+                        documentsDelegate.didSelectPhotos(photos, notify, scheduleDate, scheduleRepeatPeriod, payStars);
                     } else if (baseFragment instanceof ChatActivity) {
-                        ((ChatActivity) baseFragment).didSelectPhotos(photos, notify, scheduleDate, payStars);
+                        ((ChatActivity) baseFragment).didSelectPhotos(photos, notify, scheduleDate, scheduleRepeatPeriod, payStars);
                     } else if (baseFragment instanceof PassportActivity) {
                         ((PassportActivity) baseFragment).didSelectPhotos(photos, notify, scheduleDate);
                     }
@@ -4780,8 +4780,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
     private void setNavBarAlpha(float alpha) {
         navBarColor = ColorUtils.setAlphaComponent(getThemedColor(Theme.key_windowBackgroundGray), Math.min(255, Math.max(0, (int) (255 * alpha))));
-        AndroidUtilities.setNavigationBarColor(getWindow(), navBarColor, false);
-        AndroidUtilities.setLightNavigationBar(getWindow(), AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
+        AndroidUtilities.setNavigationBarColor(this, navBarColor, false);
+        AndroidUtilities.setLightNavigationBar(this, AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
         getContainer().invalidate();
     }
 
@@ -4884,8 +4884,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         if (Build.VERSION.SDK_INT >= 30) {
             navBarColorKey = -1;
             navBarColor = getThemedColor(Theme.key_dialogBackgroundGray);
-            AndroidUtilities.setNavigationBarColor(getWindow(), getThemedColor(Theme.key_dialogBackground), false);
-            AndroidUtilities.setLightNavigationBar(getWindow(), AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
+            AndroidUtilities.setNavigationBarColor(this, getThemedColor(Theme.key_dialogBackground), false);
+            AndroidUtilities.setLightNavigationBar(this, AndroidUtilities.computePerceivedBrightness(navBarColor) > 0.721);
         } else {
             fixNavigationBar(getThemedColor(Theme.key_dialogBackground));
         }
@@ -5992,7 +5992,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 layouts[a].onDismiss();
             }
         }
-        AndroidUtilities.setNavigationBarColor(getWindow(), ColorUtils.setAlphaComponent(getThemedColor(Theme.key_windowBackgroundGray), 0), true, tcolor -> {
+        AndroidUtilities.setNavigationBarColor(this, ColorUtils.setAlphaComponent(getThemedColor(Theme.key_windowBackgroundGray), 0), true, tcolor -> {
             navBarColorKey = -1;
             navBarColor = tcolor;
             containerView.invalidate();
@@ -6057,7 +6057,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
     public MentionsContainerView mentionContainer;
     private void createMentionsContainer() {
-        mentionContainer = new MentionsContainerView(getContext(), UserConfig.getInstance(currentAccount).getClientUserId(), 0, LaunchActivity.getLastFragment(), null, resourcesProvider) {
+        mentionContainer = new MentionsContainerView(getContext(), UserConfig.getInstance(currentAccount).getClientUserId(), 0, LaunchActivity.getLastFragment(), resourcesProvider) {
             @Override
             protected void onScrolled(boolean atTop, boolean atBottom) {
                 if (photoLayout != null) {
@@ -6303,7 +6303,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
     public void onCameraButtonLongPress() {
         if ((photosEnabled || videosEnabled || !checkCanRemoveRestrictionsByBoosts()) && delegate != null) {
-            OctoUtils.showAlertSystemCameraMode(getContext(), value -> delegate.didPressedButton(value, false, true, 0, 0, false, false, 0));
+            OctoUtils.showAlertSystemCameraMode(getContext(), value -> delegate.didPressedButton(value, false, true, 0, 0, 0, false, false, 0));
         }
     }
 }

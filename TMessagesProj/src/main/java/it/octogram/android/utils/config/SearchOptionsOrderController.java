@@ -8,6 +8,7 @@
 
 package it.octogram.android.utils.config;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SearchOptionsOrderController {
@@ -19,7 +20,7 @@ public class SearchOptionsOrderController {
     }
 
     public static List<Integer> getCurrentOrder() {
-        return null;
+        return Collections.emptyList();
     }
 
     public static void saveCurrentOrder(List<Integer> options) {

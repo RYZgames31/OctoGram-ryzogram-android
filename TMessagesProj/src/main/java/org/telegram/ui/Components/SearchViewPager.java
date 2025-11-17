@@ -927,7 +927,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                     for (int a = 0; a < dids.size(); a++) {
                         long did = dids.get(a).dialogId;
                         if (message != null) {
-                            AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, true, 0, null, false));
+                            AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, true, 0, 0, null, false));
                         }
                         AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(fmessages, did, false,false, true, 0, 0);
                     }
@@ -1365,36 +1365,36 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         }
 
         public void updateItems() {
-            items.clear();
+            ArrayList<Item> newItems = new ArrayList<>();
 
             var _getCurrentOrder = SearchOptionsOrderController.getCurrentOrder();
             if (_getCurrentOrder == null) {
-                items.add(new Item(DIALOGS_TYPE));
+                newItems.add(new Item(DIALOGS_TYPE));
                 if (expandedPublicPosts) {
-                    items.add(new Item(PUBLIC_POSTS_TYPE));
+                    newItems.add(new Item(PUBLIC_POSTS_TYPE));
                 }
-                items.add(new Item(CHANNELS_TYPE));
-                items.add(new Item(BOTS_TYPE));
-                items.add(new Item(POSTS_TYPE));
+                newItems.add(new Item(CHANNELS_TYPE));
+                newItems.add(new Item(BOTS_TYPE));
+                newItems.add(new Item(POSTS_TYPE));
                 if (!showOnlyDialogsAdapter) {
                     Item item = new Item(FILTER_TYPE);
                     item.filterIndex = 0;
-                    items.add(item);
+                    newItems.add(item);
                     if (includeDownloads()) {
-                        items.add(new Item(DOWNLOADS_TYPE));
+                        newItems.add(new Item(DOWNLOADS_TYPE));
                     }
                     item = new Item(FILTER_TYPE);
                     item.filterIndex = 1;
-                    items.add(item);
+                    newItems.add(item);
                     item = new Item(FILTER_TYPE);
                     item.filterIndex = 2;
-                    items.add(item);
+                    newItems.add(item);
                     item = new Item(FILTER_TYPE);
                     item.filterIndex = 3;
-                    items.add(item);
+                    newItems.add(item);
                     item = new Item(FILTER_TYPE);
                     item.filterIndex = 4;
-                    items.add(item);
+                    newItems.add(item);
                 }
             } else {
                 for (int option : _getCurrentOrder) {
@@ -1405,14 +1405,19 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                         if (option == DOWNLOADS_TYPE && (showOnlyDialogsAdapter || !includeDownloads())) {
                             continue;
                         }
-                        items.add(new Item(option));
+                        newItems.add(new Item(option));
                     } else if (!showOnlyDialogsAdapter) {
                         Item item = new Item(FILTER_TYPE);
                         item.filterIndex = -option - 1;
-                        items.add(item);
+                        newItems.add(item);
                     }
                 }
             }
+
+            if (newItems.isEmpty()) {
+                newItems.add(new Item(DIALOGS_TYPE));
+            }
+            items = newItems;
         }
 
         @Override

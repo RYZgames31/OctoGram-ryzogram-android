@@ -167,7 +167,6 @@ import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkPath;
-import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.LoadingDrawable;
 import org.telegram.ui.Components.LoginOrView;
 import org.telegram.ui.Components.OutlineTextContainerView;
@@ -191,7 +190,6 @@ import org.telegram.ui.Components.VerticalPositionAutoAnimator;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.Stars.ExplainStarsSheet;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
-import org.telegram.ui.Stories.recorder.GallerySheet;
 import org.telegram.ui.bots.BotWebViewSheet;
 
 import java.io.BufferedReader;
@@ -385,6 +383,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private boolean needRequestPermissions;
 
     private Runnable emailChangeFinishCallback;
+    private @Nullable Runnable emailChangeSkipCallback;
+    private @Nullable TextView emailChangeSkipButton;
+    private boolean emailChangeNonSkippable;
+    private boolean emailChangeIsSuggestion;
+
 
     private boolean[] doneProgressVisible = new boolean[2];
     private Runnable[] editDoneCallback = new Runnable[2];
@@ -476,6 +479,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         return this;
     }
 
+    public LoginActivity changeEmail(Runnable onFinishCallback, Runnable onSkipCallback, boolean isNonSkippable) {
+        activityMode = MODE_CHANGE_LOGIN_EMAIL;
+        currentViewNum = VIEW_ADD_EMAIL;
+        emailChangeFinishCallback = onFinishCallback;
+        emailChangeSkipCallback = onSkipCallback;
+        emailChangeNonSkippable = isNonSkippable;
+        emailChangeIsSuggestion = true;
+        return this;
+    }
+
     public LoginActivity cancelAccountDeletion(String phone, Bundle params, TLRPC.TL_auth_sentCode sentCode) {
         cancelDeletionPhone = phone;
         cancelDeletionParams = params;
@@ -511,11 +524,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             }
         }
         getNotificationCenter().removeObserver(this, NotificationCenter.didUpdateConnectionState);
+        getNotificationCenter().removeObserver(this, NotificationCenter.newSuggestionsAvailable);
     }
 
     @Override
     public boolean onFragmentCreate() {
         getNotificationCenter().addObserver(this, NotificationCenter.didUpdateConnectionState);
+        getNotificationCenter().addObserver(this, NotificationCenter.newSuggestionsAvailable);
         return super.onFragmentCreate();
     }
 
@@ -570,6 +585,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
                 marginLayoutParams = (MarginLayoutParams) radialProgressView.getLayoutParams();
                 marginLayoutParams.topMargin = AndroidUtilities.dp(16) + statusBarHeight;
+
+                if (emailChangeSkipButton != null) {
+                    marginLayoutParams = (MarginLayoutParams) emailChangeSkipButton.getLayoutParams();
+                    marginLayoutParams.topMargin = AndroidUtilities.dp(16) + statusBarHeight;
+                }
 
                 if (measureKeyboardHeight() > AndroidUtilities.dp(20) && keyboardView.getVisibility() != GONE && !isCustomKeyboardForceDisabled() && !customKeyboardWasVisible) {
                     if (keyboardAnimator != null) {
@@ -741,6 +761,23 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         int padding = AndroidUtilities.dp(4);
         backButtonView.setPadding(padding, padding, padding, padding);
         sizeNotifierFrameLayout.addView(backButtonView, LayoutHelper.createFrame(32, 32, Gravity.LEFT | Gravity.TOP, 16, 16, 0, 0));
+
+        if (emailChangeSkipCallback != null && !emailChangeNonSkippable && emailChangeIsSuggestion) {
+            emailChangeSkipButton = new TextView(context);
+            emailChangeSkipButton.setGravity(Gravity.CENTER | Gravity.LEFT);
+            emailChangeSkipButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+            emailChangeSkipButton.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
+            emailChangeSkipButton.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 0);
+            emailChangeSkipButton.setText(getString(R.string.YourEmailSkip));
+            emailChangeSkipButton.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4));
+            sizeNotifierFrameLayout.addView(emailChangeSkipButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 30, Gravity.TOP | Gravity.RIGHT, 0, 16, 16, 0));
+            emailChangeSkipButton.setOnClickListener(v -> {
+                if (emailChangeSkipCallback != null) {
+                    emailChangeSkipCallback.run();
+                }
+                finishFragment();
+            });
+        }
 
         proxyButtonView = new ImageView(context);
         proxyButtonView.setImageDrawable(proxyDrawable = new ProxyDrawable(context));
@@ -1069,7 +1106,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     }
 
     @Override
+    public boolean isSwipeBackEnabled(MotionEvent event) {
+        return !emailChangeIsSuggestion;
+    }
+
+    @Override
     public boolean onBackPressed() {
+        if (emailChangeIsSuggestion && currentViewNum == VIEW_ADD_EMAIL) {
+            return false;
+        }
+
         if (currentViewNum == VIEW_PHONE_INPUT || activityMode == MODE_CHANGE_LOGIN_EMAIL && currentViewNum == VIEW_ADD_EMAIL) {
             for (int a = 0; a < views.length; a++) {
                 if (views[a] != null) {
@@ -6061,7 +6107,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         @Override
         public boolean needBackButton() {
-            return true;
+            return !emailChangeIsSuggestion;
         }
 
         @Override
@@ -8909,6 +8955,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     public void didReceivedNotification(int id, int account, Object... args) {
         if (id == NotificationCenter.didUpdateConnectionState) {
             updateProxyButton(true, false);
+        } else if (id == NotificationCenter.newSuggestionsAvailable) {
+            if (emailChangeIsSuggestion && !getMessagesController().hasSetupEmailSuggestion()) {
+                finishFragment();
+            }
         }
     }
 

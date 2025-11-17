@@ -190,9 +190,10 @@ public class SendMessageOptions extends LinearLayout {
                 if (sendPopupWindow != null && sendPopupWindow.isShowing()) {
                     sendPopupWindow.dismiss();
                 }
-                AlertsCreator.createScheduleDatePickerDialog(parentActivity, 0, (notify, scheduleDate) -> {
+                AlertsCreator.createScheduleDatePickerDialog(parentActivity, 0, (notify, scheduleDate, scheduleRepeatPeriod) -> {
                     forwardParams.notify = notify;
                     forwardParams.scheduleDate = scheduleDate;
+                    forwardParams.scheduleRepeatPeriod = scheduleRepeatPeriod;
                     delegate.sendMessage();
                 }, resourcesProvider);
             });
@@ -255,15 +256,14 @@ public class SendMessageOptions extends LinearLayout {
                 data.messageText = getTextFieldContent();
                 data.useSwipeBack = false;
                 data.isInputBox = true;
-                data.setInputBoxText = (v) -> {
-                    AndroidUtilities.runOnUIThread(() -> {
-                        if (commentTextView instanceof ChatActivityEnterView) {
-                            ((ChatActivityEnterView) commentTextView).setFieldText(v);
-                        } else if (commentTextView instanceof EditTextEmoji) {
-                            ((EditTextEmoji) commentTextView).setText(v);
-                        }
-                    });
-                };
+                data.setInputBoxText = (v) ->
+                        AndroidUtilities.runOnUIThread(() -> {
+                            if (commentTextView instanceof ChatActivityEnterView) {
+                                ((ChatActivityEnterView) commentTextView).setFieldText(v);
+                            } else if (commentTextView instanceof EditTextEmoji) {
+                                ((EditTextEmoji) commentTextView).setText(v);
+                            }
+                        });
                 CustomModelsMenuWrapper.initState(data);
             }
         }

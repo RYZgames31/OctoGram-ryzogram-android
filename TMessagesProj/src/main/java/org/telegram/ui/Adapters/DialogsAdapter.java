@@ -136,7 +136,6 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     RecyclerListView recyclerListView;
     private PullForegroundDrawable pullForegroundDrawable;
     ArrayList<ItemInternal> itemInternals = new ArrayList<>();
-    ArrayList<ItemInternal> oldItems = new ArrayList<>();
 
     private Drawable arrowDrawable;
 
@@ -496,16 +495,15 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             return;
         }
         isCalculatingDiff = true;
-        oldItems = new ArrayList<>();
-        oldItems.addAll(itemInternals);
+        final ArrayList<ItemInternal> previousItems = new ArrayList<>(itemInternals);
         updateItemList();
-        ArrayList<ItemInternal> newItems = new ArrayList<>(itemInternals);
-        itemInternals = oldItems;
+        final ArrayList<ItemInternal> newItems = new ArrayList<>(itemInternals);
+        itemInternals = previousItems;
 
         DiffUtil.Callback callback = new DiffUtil.Callback() {
             @Override
             public int getOldListSize() {
-                return oldItems.size();
+                return previousItems.size();
             }
 
             @Override
@@ -515,12 +513,12 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
 
             @Override
             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return oldItems.get(oldItemPosition).compare(newItems.get(newItemPosition));
+                return previousItems.get(oldItemPosition).compare(newItems.get(newItemPosition));
             }
 
             @Override
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                return oldItems.get(oldItemPosition).viewType == newItems.get(newItemPosition).viewType;
+                return previousItems.get(oldItemPosition).viewType == newItems.get(newItemPosition).viewType;
             }
         };
         if (itemInternals.size() < 50 || !ALLOW_UPDATE_IN_BACKGROUND) {

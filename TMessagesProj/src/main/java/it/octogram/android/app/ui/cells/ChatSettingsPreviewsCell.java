@@ -70,6 +70,7 @@ import org.telegram.ui.Components.UnreadCounterTextView;
 import org.telegram.ui.Components.ViewPagerFixed;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -896,7 +897,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
 
     private static class FakeDelegate implements ChatActivityEnterView.ChatActivityEnterViewDelegate {
         @Override
-        public void onMessageSend(CharSequence message, boolean notify, int scheduleDate, long payStars) {
+        public void onMessageSend(CharSequence message, boolean notify, int scheduleDate, int scheduleRepeatPeriod, long payStars) {
 
         }
 
@@ -951,7 +952,7 @@ public class ChatSettingsPreviewsCell extends FrameLayout {
         }
 
         @Override
-        public void needStartRecordVideo(int state, boolean notify, int scheduleDate, int ttl, long effectId, long stars) {
+        public void needStartRecordVideo(int state, boolean notify, int scheduleDate, int scheduleRepeatPeriod, int ttl, long effectId, long stars) {
 
         }
 

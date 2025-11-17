@@ -165,11 +165,21 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
         items.add(ItemInner.asInfo(getString(R.string.SearchItems_Customize)));
 
         if (adapter != null) {
-            if (animated) {
-                adapter.setItems(oldItems, items);
-            } else {
-                adapter.notifyDataSetChanged();
+            handleAdapterUpdate(animated);
+        }
+    }
+
+    private void handleAdapterUpdate(boolean animated) {
+        RecyclerView.ItemAnimator animator = null;
+        if (!animated && listView != null) {
+            animator = listView.getItemAnimator();
+            if (animator != null) {
+                listView.setItemAnimator(null);
             }
+        }
+        adapter.setItems(oldItems, items);
+        if (!animated && listView != null && animator != null) {
+            listView.setItemAnimator(animator);
         }
     }
 
@@ -224,7 +234,10 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
         itemAnimator.setDelayAnimations(false);
         itemAnimator.setSupportsChangeAnimations(false);
         listView.setItemAnimator(itemAnimator);
-        ((DefaultItemAnimator) listView.getItemAnimator()).setDelayAnimations(false);
+        DefaultItemAnimator animator = ((DefaultItemAnimator) listView.getItemAnimator());
+        if (animator != null) {
+            animator.setDelayAnimations(false);
+        }
         listView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         listView.setVerticalScrollBarEnabled(false);
         itemTouchHelper = new ItemTouchHelper(new TouchHelperCallback());
@@ -276,7 +289,7 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
     public void onResume() {
         super.onResume();
         if (adapter != null) {
-            adapter.notifyDataSetChanged();
+            updateRows(false);
         }
     }
 
@@ -370,8 +383,11 @@ public class OctoGeneralSearchOrderUI extends BaseFragment {
                     ItemCell cell = new ItemCell(mContext);
                     cell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     cell.setOnReorderButtonTouchListener((v, event) -> {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
                             itemTouchHelper.startDrag(listView.getChildViewHolder(cell));
+                        }
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            v.performClick();
                         }
                         return false;
                     });
