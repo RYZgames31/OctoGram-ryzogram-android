@@ -8585,6 +8585,8 @@
     <string name="Gift2HideSelfInfo">Hide my name and message from visitors to my profile</string>
     <string name="Gift2AuctionInfo_one">%d gift is dropped at varying intervals to the top %d bidder by bid amount.</string>
     <string name="Gift2AuctionInfo_other">%d gifts are dropped at varying intervals to the top %d bidders by bid amount.</string>
+    <string name="Gift2AuctionInfoLearnMore2_one">%d gift is dropped at varying intervals to the top %d bidder by bid amount. **Learn More >**</string>
+    <string name="Gift2AuctionInfoLearnMore2_other">%d gifts are dropped at varying intervals to the top %d bidders by bid amount. **Learn More >**</string>
     <string name="Gift2AuctionInfo2_one">Top **%d** bidder will get an **%s**\nthis round.</string>
     <string name="Gift2AuctionInfo2_other">Top **%d** bidders will get an **%s**\nthis round.</string>
     <string name="Gift2AuctionTableStarted">Started</string>
@@ -8610,6 +8612,7 @@
 
     <string name="Gift2AuctionBidInfoMinimumBid">minimum bid</string>
     <string name="Gift2AuctionBidInfoUntilNextRound">until next round</string>
+    <string name="Gift2AuctionBidInfoUntilEndRound">last round</string>
     <string name="Gift2AuctionBidInfoLeft">left</string>
     <string name="Gift2AuctionAlreadyParticipateTitle">Auction</string>
     <string name="Gift2AuctionAlreadyParticipate">You are already participating in an auction for **%s**. You can only participate in one auction. Win the current round or wait until you are removed from the list of participants.</string>
@@ -9963,6 +9966,8 @@
     <string name="LiveStoryPricePerCommentInfo">The price a viewer must pay to send a comment.</string>
     <string name="LiveStoryRTMPEnable">Connect Stream</string>
     <string name="LiveStoryRTMPRevoke">Revoke Stream Key</string>
+    <string name="LiveStoryRTMPRevokeTitle">Revoke Stream Key</string>
+    <string name="LiveStoryRTMPRevokeText">Are you sure you want to regenerate your stream key?</string>
     <string name="LiveStoryRTMPEnableInfo">Stream with a different app.</string>
     <string name="LiveStoryRTMPDisable">Stream from your phone</string>
     <string name="LiveStoryRTMPSettings">RTMP Settings</string>
@@ -10009,6 +10014,10 @@
     <string name="Gift2ActiveAuctionsActiveStatusWinning2Place">2nd place</string>
     <string name="Gift2ActiveAuctionsActiveStatusWinning3Place">3rd place</string>
     <string name="Gift2ActiveAuctionsActiveStatusWinningOtherPlace">%d place</string>
+    <string name="Gift2ActiveAuctionsActiveStatusWinningOtherSt">%dst place</string>
+    <string name="Gift2ActiveAuctionsActiveStatusWinningOtherNd">%dnd place</string>
+    <string name="Gift2ActiveAuctionsActiveStatusWinningOtherRd">%drd place</string>
+    <string name="Gift2ActiveAuctionsActiveStatusWinningOtherTh">%dth place</string>
     <string name="Gift2ActiveAuctionsActiveStatusWinningAll">You are winning all of them.</string>
     <string name="Gift2ActiveAuctionsActiveStatusOutbid">You\'ve been outbid.</string>
 
