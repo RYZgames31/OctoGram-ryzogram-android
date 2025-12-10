@@ -1,26 +1,26 @@
-name: Android CI
+# Примерный фрагмент workflow — добавьте этот шаг перед запуском сборки Gradle
+- name: Ensure Android SDK is available
+  uses: android/actions/setup-android@v2
+  with:
+    api-level: 33
+    ndk: '27.2.12479018' # при необходимости укажите нужную версию NDK
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+- name: Create local.properties for CI
+  run: |
+    echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+    # Запишем sdk.dir — использовать переменную окружения, которую выставляет setup-android
+    if [ -n "$ANDROID_SDK_ROOT" ]; then
+      echo "sdk.dir=$ANDROID_SDK_ROOT" > "$GITHUB_WORKSPACE/local.properties"
+    else
+      # запасной вариант: иногда SDK устанавливают в /github/home/Android/Sdk
+      echo "sdk.dir=/github/home/Android/Sdk" > "$GITHUB_WORKSPACE/local.properties"
+    fi
 
-jobs:
-  build:
+    # Если у вас нужен ndk.dir, добавим его, если переменная установлена
+    if [ -n "$ANDROID_NDK_HOME" ]; then
+      echo "ndk.dir=$ANDROID_NDK_HOME" >> "$GITHUB_WORKSPACE/local.properties"
+    fi
 
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+    # вывести содержимое для отладки
+    echo "Created local.properties:"
+    cat "$GITHUB_WORKSPACE/local.properties"
