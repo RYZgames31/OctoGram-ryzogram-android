@@ -1,5 +1,7 @@
 <img src="images/AppIcon.png" width="150" align="left"/>
 
+RYZogram
+
 # 🐙 OctoGram
 *[Licensed under the GNU General Public License v2.0](https://github.com/OctoGramApp/OctoGram/blob/main/LICENSE)*
 
