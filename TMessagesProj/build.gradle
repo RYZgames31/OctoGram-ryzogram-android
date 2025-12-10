@@ -156,7 +156,7 @@ dependencies {
 }
 
 android {
-    namespace = 'org.telegram.messenger'
+    namespace = 'org.telegram.messenger.ryz'
 
     sourceSets.main.jniLibs.srcDirs = ['./jni/']
 
@@ -168,7 +168,7 @@ android {
 
     buildTypes {
         debug {
-            resValue "string", "BuildAppName", "@string/AppNameBeta"
+            resValue "string", "BuildAppName", "RYZogram"
             buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "true"
             buildConfigField "String", "BUILD_VERSION_STRING", "\"${getVersionPBetaName()}\""
             buildConfigField "int", "VERSION_NUM", "0"
